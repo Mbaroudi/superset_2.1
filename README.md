@@ -138,8 +138,131 @@ Here are some of the major database solutions that are supported:
 Want to add support for your datastore or data engine? Read more [here](https://superset.apache.org/docs/frequently-asked-questions#does-superset-work-with-insert-database-engine-here) about the technical requirements.
 
 ## Installation and Configuration
+# Apache Superset Installation Guide Using Docker Compose
+
+## Prerequisites
+
+This guide provides a step-by-step approach to setting up a secure instance of Apache Superset using Docker Compose.
+
+### Overview
+
+Our Apache Superset deployment has the following characteristics:
+
+- Utilizes Docker Compose for installation and runtime management. [More Info](https://superset.apache.org/docs/intro)
+- Runs on port 8088.
+- Assumes the domain name for the installation server is "bi.fogoros.com".
+
+### System Preparation
+
+ **Install Docker and Docker Compose:**
+
+   ```bash
+   sudo apt-get install docker docker-compose
+   ```
+  # Generate a Secret Key:
+ ```bash
+ openssl rand -hex 32
+```
+  # Set the Superset Home Directory:
+```bash
+export SUPERSET_HOME=/app/superset_home
+```
+  # Configure Permissions for Shared Volume Folder:
+```bash
+chown -R superset:superset $SUPERSET_HOME/db/
+chmod -R 755 $SUPERSET_HOME/db/
+```
+
+For integration with back-office tools (Dagster, DBT), ensure you have a shared Docker volume containing datamart.duckdb, which will be created in the back-office part with the appropriate read/write/execute permissions.
+
+DuckDB path: duckdb:///superset_home/db/datamart.duckdb
+### Installation
+We use Docker Compose for the setup. The following commands set up the stable version of Superset.
+```bash
+git clone https://github.com/apache/superset.git
+cd superset
+```
+ # Download the latest version of superset-compose:
+```bash
+docker-compose -f docker-compose-non-dev.yml pull
+```
+Note: This command downloads the Docker images for the latest version of Apache Superset. If you need a stable version, refer to a specific tag in the docker-compose-non-dev.yml file.
+
+ # Configure Environment Variables and Superset Settings:
+
+Update $AS_HOME/superset/docker/.env-non-dev:
+```bash
+# Enable Flask Debugging
+FLASK_DEBUG=True
+
+# Superset loads many sample dashboards by default. 
+SUPERSET_LOAD_EXAMPLES=no  
+
+# Enable dashboard embedding 
+SUPERSET_FEATURE_EMBEDDED_SUPERSET='true'
+
+# Update the secret key:
+SUPERSET_SECRET_KEY='[insert_secret_key_here]'
+
+# Set the Mapbox API key (https://account.mapbox.com/access-tokens)
+MAPBOX_API_KEY='[api_key_from_mapbox_site]'
+```
+
+Update $AS_HOME/superset/docker/pythonpath_dev/superset_config.py:
+```bash
+# Enable embedding of dashboards and other features
+FEATURE_FLAGS = {
+    "EMBEDDED_SUPERSET": True,
+    "DASHBOARD_NATIVE_FILTERS": True,
+    # ... other flags
+}
+
+# Update the WEBDRIVER base url to your server name
+WEBDRIVER_BASEURL = "https://bi.fogoros.com/"
+
+# Disable the public role:
+PUBLIC_ROLE_LIKE = None
+
+# Set the guest role name:
+GUEST_ROLE_NAME = "Gamma"
+
+# Enable caching of filter states and form data:
+FILTER_STATE_CACHE_CONFIG = {
+   "CACHE_TYPE": "RedisCache",
+   "CACHE_DEFAULT_TIMEOUT": 300,
+   "CACHE_KEY_PREFIX": "superset_filter_cache",
+   "CACHE_REDIS_HOST": REDIS_HOST,
+   "CACHE_REDIS_PORT": REDIS_PORT,
+   "CACHE_REDIS_DB": REDIS_RESULTS_DB,
+}
+EXPLORE_FORM_DATA_CACHE_CONFIG = {
+   "CACHE_TYPE": "RedisCache",
+   "CACHE_DEFAULT_TIMEOUT": 300,
+   "CACHE_KEY_PREFIX": "superset_form_data_cache",
+   "CACHE_REDIS_HOST": REDIS_HOST,
+   "CACHE_REDIS_PORT": REDIS_PORT,   
+   "CACHE_REDIS_DB": REDIS_RESULTS_DB,
+}
+```
+
+ # Adding DB Driver to Superset:
+Add the DuckDB engine driver in docker/requirements-local.txt:
+```bash
+duckdb-engine
+```
+### Running Superset
+After configuring the settings, you can start Apache Superset by running:
+```bash
+docker-compose -f docker-compose-non-dev.yml up
+#if you need to rebuild all
+docker-compose -f docker-compose-non-dev.yml up --build
+```
+Access Superset at http://bi.fogoros.com:8088 or the appropriate URL based on your configuration.
+
+For more information:
 
 [Extended documentation for Superset](https://superset.apache.org/docs/installation/installing-superset-using-docker-compose)
+[Linkedin best documentation for Superset](https://www.linkedin.com/pulse/apache-superset-getting-up-running-soteri-panagou/)
 
 ## Get Involved
 
