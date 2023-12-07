@@ -259,7 +259,12 @@ docker-compose -f docker-compose-non-dev.yml up --build
 ```
 Access Superset at http://bi.fogoros.com:8088 or the appropriate URL based on your configuration.
 
-For more information:
+# Fore SSO/oAuth2 Keycloack Configuration:
+
+[Please see this git repository:] https://github.com/marvincorreia/superset-keycloak/tree/main
+
+
+# For more information:
 
 [Extended documentation for Superset](https://superset.apache.org/docs/installation/installing-superset-using-docker-compose)
 [Linkedin best documentation for Superset](https://www.linkedin.com/pulse/apache-superset-getting-up-running-soteri-panagou/)
