@@ -163,11 +163,11 @@ Our Apache Superset deployment has the following characteristics:
  ```bash
  openssl rand -hex 32
 ```
-  # Set the Superset Home Directory:
+  # Set the Superset Home Directory (to be added in docker-compose.yaml with CMD):
 ```bash
 export SUPERSET_HOME=/app/superset_home
 ```
-  # Configure Permissions for Shared Volume Folder:
+  # Configure Permissions for Shared Volume Folder (to be added in docker-compose.yaml with CMD):
 ```bash
 chown -R superset:superset $SUPERSET_HOME/db/
 chmod -R 755 $SUPERSET_HOME/db/
@@ -184,7 +184,7 @@ cd superset
 ```
  # Download the latest version of superset-compose:
 ```bash
-docker-compose -f docker-compose-non-dev.yml pull
+docker compose -f docker-compose-non-dev.yml pull
 ```
 Note: This command downloads the Docker images for the latest version of Apache Superset. If you need a stable version, refer to a specific tag in the docker-compose-non-dev.yml file.
 
@@ -253,9 +253,9 @@ duckdb-engine
 ### Running Superset
 After configuring the settings, you can start Apache Superset by running:
 ```bash
-docker-compose -f docker-compose-non-dev.yml up
+docker compose -f docker-compose-non-dev.yml up
 #if you need to rebuild all
-docker-compose -f docker-compose-non-dev.yml up --build
+docker compose -f docker-compose-non-dev.yml up --build
 ```
 Access Superset at http://bi.fogoros.com:8088 or the appropriate URL based on your configuration.
 
